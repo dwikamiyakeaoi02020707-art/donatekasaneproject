@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donasi - Nookleaf Project</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        h1 {
+            margin-bottom: 5px;
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+        p {
+            margin-bottom: 20px;
+            color: #d1e0fc;
+            font-size: 15px;
+        }
+        
+        /* Gaya untuk Progress Bar */
+        .progress-wrapper {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .progress-title {
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #4CAF50; /* Hijau untuk progres */
+            width: 0%; /* Diatur oleh JavaScript */
+            transition: width 0.5s ease-in-out;
+        }
+        .progress-stats {
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            color: #d1e0fc;
+        }
+
+        /* Gaya untuk Tombol */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            transition: transform 0.2s, opacity 0.2s;
+            box-sizing: border-box;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.95;
+        }
+        .btn-tako { background-color: #e53935; }
+        .btn-saweria { background-color: #d4af37; }
+        .btn-wa { background-color: #25D366; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Nookleaf Project</h1>
+        <p>Dukung terus pengembangan sistem kami!</p>
+
+        <!-- Progress Bar Section -->
+        <div class="progress-wrapper">
+            <div class="progress-title">Target Donasi: Rp 10.000.000</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-stats">
+                <span id="current-amount">Terkumpul: Rp 0</span>
+                <span id="percentage">0%</span>
+            </div>
+        </div>
+
+        <a href="https://tako.id/hananookleafproject/gift" class="btn btn-tako" target="_blank">🐙 Traktir Tako</a>
+        <a href="https://saweria.co/tetoyapping29312" class="btn btn-saweria" target="_blank">💸 Top Up via Saweria</a>
+        <a href="https://wa.me/6282157833066?text=Halo%20Zaki,%20saya%20ingin%20berdonasi%20secara%20manual%20untuk%20Nookleaf%20Project" class="btn btn-wa" target="_blank">📱 Manual via WhatsApp</a>
+    </div>
+
+    <!-- Script Kalkulasi Otomatis -->
+    <script>
+        // 1. ATUR SALDO DAN KURS DI SINI
+        const saldoTako = 2.80;
+        const saldoSafelinku = 1.810883;
+        const kursUSDkeIDR = 15500; // Ganti dengan kurs tukar Rupiah asli saat ini
+        const targetIDR = 10000000; // Target 10 Juta
+
+        // 2. Perhitungan Matematika
+        const totalUSD = saldoTako + saldoSafelinku;
+        const totalIDR = totalUSD * kursUSDkeIDR;
+        let persentase = (totalIDR / targetIDR) * 100;
+
+        // Cegah persentase melebihi 100% secara visual jika target tercapai
+        if (persentase > 100) persentase = 100; 
+
+        // 3. Format angka ke Rupiah
+        const formatRupiah = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(totalIDR);
+
+        // 4. Update elemen di HTML
+        document.getElementById('progress-fill').style.width = persentase + '%';
+        document.getElementById('current-amount').innerText = 'Terkumpul: ' + formatRupiah;
+        document.getElementById('percentage').innerText = persentase.toFixed(2) + '%';
+    </script>
+</body>
+</html>
