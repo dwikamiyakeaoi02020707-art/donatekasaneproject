@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -33,6 +34,21 @@
             font-size: 15px;
         }
         
+        /* Gaya untuk Pilihan Mata Uang */
+        .currency-selector {
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .currency-selector select {
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.9);
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+        }
+
         /* Gaya untuk Progress Bar */
         .progress-wrapper {
             background-color: rgba(0, 0, 0, 0.3);
@@ -56,8 +72,8 @@
         }
         .progress-fill {
             height: 100%;
-            background-color: #4CAF50; /* Hijau untuk progres */
-            width: 0%; /* Diatur oleh JavaScript */
+            background-color: #4CAF50;
+            width: 0%;
             transition: width 0.5s ease-in-out;
         }
         .progress-stats {
@@ -96,9 +112,18 @@
         <h1>Nookleaf Project</h1>
         <p>Dukung terus pengembangan sistem kami!</p>
 
+        <!-- Dropdown Pilih Mata Uang -->
+        <div class="currency-selector">
+            <label for="currency-select">Tampilkan Saldo dalam: </label>
+            <select id="currency-select" onchange="updateDisplay()">
+                <option value="IDR">🇮🇩 Rupiah (IDR)</option>
+                <option value="USD">🇺🇸 Dollar (USD)</option>
+            </select>
+        </div>
+
         <!-- Progress Bar Section -->
         <div class="progress-wrapper">
-            <div class="progress-title">Target Donasi: Rp 10.000.000</div>
+            <div class="progress-title" id="target-amount">Target Donasi: Rp 10.000.000</div>
             <div class="progress-bar">
                 <div class="progress-fill" id="progress-fill"></div>
             </div>
@@ -113,34 +138,66 @@
         <a href="https://wa.me/6282157833066?text=Halo%20Zaki,%20saya%20ingin%20berdonasi%20secara%20manual%20untuk%20Nookleaf%20Project" class="btn btn-wa" target="_blank">📱 Manual via WhatsApp</a>
     </div>
 
-    <!-- Script Kalkulasi Otomatis -->
+    <!-- Script Kalkulasi Otomatis & Ganti Mata Uang -->
     <script>
+        // ==========================================
         // 1. ATUR SALDO DAN KURS DI SINI
-        const saldoTako = 2.80;
-        const saldoSafelinku = 1.810883;
-        const kursUSDkeIDR = 15500; // Ganti dengan kurs tukar Rupiah asli saat ini
-        const targetIDR = 10000000; // Target 10 Juta
+        // ==========================================
+        const saldoTakoUSD = 2.80;
+        const saldoSafelinkuUSD = 1.810883;
+        const saldoTakoIDR = 9800; // Donasi yang masuk dalam bentuk Rupiah
+        
+        const kursUSDkeIDR = 15500; // Kurs tukar 1 USD ke IDR
+        const targetIDR = 10000000; // Target 10 Juta Rupiah
 
-        // 2. Perhitungan Matematika
-        const totalUSD = saldoTako + saldoSafelinku;
-        const totalIDR = totalUSD * kursUSDkeIDR;
-        let persentase = (totalIDR / targetIDR) * 100;
+        // ==========================================
+        // 2. LOGIKA PERHITUNGAN
+        // ==========================================
+        // Hitung semua ke base Rupiah (IDR)
+        const totalUSD_to_IDR = (saldoTakoUSD + saldoSafelinkuUSD) * kursUSDkeIDR;
+        const totalKeseluruhanIDR = totalUSD_to_IDR + saldoTakoIDR;
+        
+        // Hitung semua ke base Dollar (USD)
+        const targetUSD = targetIDR / kursUSDkeIDR;
+        const totalKeseluruhanUSD = totalKeseluruhanIDR / kursUSDkeIDR;
 
-        // Cegah persentase melebihi 100% secara visual jika target tercapai
-        if (persentase > 100) persentase = 100; 
+        // Persentase Progres
+        let persentase = (totalKeseluruhanIDR / targetIDR) * 100;
+        if (persentase > 100) persentase = 100; // Maksimal tampilan bar 100%
 
-        // 3. Format angka ke Rupiah
-        const formatRupiah = new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }).format(totalIDR);
+        // ==========================================
+        // 3. FUNGSI UPDATE TAMPILAN
+        // ==========================================
+        function updateDisplay() {
+            const currency = document.getElementById('currency-select').value;
+            const targetEl = document.getElementById('target-amount');
+            const currentEl = document.getElementById('current-amount');
+            
+            // Format angka ke mata uang yang dipilih
+            if (currency === 'IDR') {
+                targetEl.innerText = 'Target Donasi: ' + formatCurrency(targetIDR, 'IDR');
+                currentEl.innerText = 'Terkumpul: ' + formatCurrency(totalKeseluruhanIDR, 'IDR');
+            } else {
+                targetEl.innerText = 'Target Donasi: ' + formatCurrency(targetUSD, 'USD');
+                currentEl.innerText = 'Terkumpul: ' + formatCurrency(totalKeseluruhanUSD, 'USD');
+            }
+            
+            // Update bar progres
+            document.getElementById('progress-fill').style.width = persentase + '%';
+            document.getElementById('percentage').innerText = persentase.toFixed(2) + '%';
+        }
 
-        // 4. Update elemen di HTML
-        document.getElementById('progress-fill').style.width = persentase + '%';
-        document.getElementById('current-amount').innerText = 'Terkumpul: ' + formatRupiah;
-        document.getElementById('percentage').innerText = persentase.toFixed(2) + '%';
+        function formatCurrency(amount, curr) {
+            return new Intl.NumberFormat(curr === 'IDR' ? 'id-ID' : 'en-US', {
+                style: 'currency',
+                currency: curr,
+                minimumFractionDigits: curr === 'IDR' ? 0 : 2,
+                maximumFractionDigits: curr === 'IDR' ? 0 : 2
+            }).format(amount);
+        }
+
+        // Jalankan fungsi saat halaman pertama kali dimuat
+        updateDisplay();
     </script>
 </body>
 </html>
